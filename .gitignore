@@ -1,0 +1,19 @@
+# secrets
+.env
+*.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# data + outputs
+data/
+
+# misc
+.DS_Store
+
+# notebooks
+.ipynb_checkpoints/
+test.ipynb

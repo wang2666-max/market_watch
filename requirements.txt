@@ -1,0 +1,12 @@
+httpx
+pandas
+numpy
+matplotlib
+seaborn
+pymongo
+praw
+nltk
+openai
+reportlab
+python-dotenv
+QuantLib
