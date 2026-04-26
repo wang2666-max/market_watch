@@ -108,7 +108,7 @@ def generate_options_report(tickers: Iterable[str] | None = None):
 
     summary = pd.DataFrame(rows).sort_values("ticker").reset_index(drop=True)
 
-    out_dir = Path(REPORTS_DIR)
+    out_dir = Path(REPORTS_DIR) / "cache"
     out_dir.mkdir(parents=True, exist_ok=True)
     today = date.today().strftime("%Y%m%d")
     out_path = out_dir / f"options_summary_{today}.csv"

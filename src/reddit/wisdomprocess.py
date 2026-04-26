@@ -296,6 +296,19 @@ def save_tickers_json(config: dict, hot: list[str], candidates: list[str]) -> No
 
 
 def main(as_of: date | None = None) -> dict:
+    from src.reddit.wisdom_signals import (
+        load_daily_rankings,
+        load_today_raw,
+        enrich_state,
+        compute_first_appearances,
+        compute_rank_jumpers,
+        compute_3day_momentum,
+        compute_persistent_leaders,
+        compute_reentries,
+        compute_mention_surges,
+        render_signal_report,
+    )
+
     load_env()
     as_of = as_of or date.today()
 
@@ -308,10 +321,17 @@ def main(as_of: date | None = None) -> dict:
     updated = update_state(state_df, today_hot, today_candidates, rank_map, as_of=as_of)
     hot, candidates = build_active_lists(updated)
 
-    save_state(updated)
+    # Load history + raw for signals
+    history = load_daily_rankings(n_days=7, today=as_of)
+    raw_results = load_today_raw(today=as_of)
+
+    # Enrich state with signal columns and save
+    enriched = enrich_state(updated, raw_results, history, today=as_of)
+    save_state(enriched)
     save_tickers_json(cfg, hot, candidates)
 
-    summary = {
+    # Compute all signal sections
+    admin = {
         "date": as_of.isoformat(),
         "eligible_hot_today": len(today_hot),
         "eligible_candidates_today": len(today_candidates),
@@ -319,14 +339,28 @@ def main(as_of: date | None = None) -> dict:
         "active_candidates": len(candidates),
     }
 
+    ts = datetime.now().strftime("%Y%m%d_%H%M")
+    signal_report = render_signal_report(
+        today=as_of,
+        ts=ts,
+        first_appearances=compute_first_appearances(enriched, as_of),
+        rank_jumpers=compute_rank_jumpers(raw_results),
+        momentum_3d=compute_3day_momentum(history),
+        persistent_leaders=compute_persistent_leaders(history),
+        reentries=compute_reentries(history, as_of),
+        mention_surges=compute_mention_surges(raw_results),
+        admin=admin,
+    )
+
     print(
         "[wisdomprocess] "
-        f"today_hot={summary['eligible_hot_today']} "
-        f"today_candidates={summary['eligible_candidates_today']} "
-        f"active_hot={summary['active_hot']} "
-        f"active_candidates={summary['active_candidates']}"
+        f"today_hot={admin['eligible_hot_today']} "
+        f"today_candidates={admin['eligible_candidates_today']} "
+        f"active_hot={admin['active_hot']} "
+        f"active_candidates={admin['active_candidates']}"
     )
-    return summary
+
+    return {**admin, "signal_report": signal_report}
 
 
 if __name__ == "__main__":

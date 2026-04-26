@@ -246,7 +246,7 @@ def pipeline_reddit_wisdom(textlist: List[str]) -> None:
     summary = wisdomprocess_main()
 
     ts = _now_tag()
-    lines = [
+    report_text = summary.get("signal_report") or "\n".join([
         f"APEWISDOM TICKER STATE — {ts}",
         "",
         f"date: {summary.get('date')}",
@@ -254,9 +254,9 @@ def pipeline_reddit_wisdom(textlist: List[str]) -> None:
         f"eligible_candidates_today: {summary.get('eligible_candidates_today')}",
         f"active_hot: {summary.get('active_hot')}",
         f"active_candidates: {summary.get('active_candidates')}",
-    ]
+    ])
 
-    p = _write_text_report(f"apewisdom_ticker_state_{ts}.txt", "\n".join(lines))
+    p = _write_text_report(f"apewisdom_ticker_state_{ts}.txt", report_text)
     _append_text(textlist, p)
 
 

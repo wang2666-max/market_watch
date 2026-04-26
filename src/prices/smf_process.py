@@ -344,7 +344,7 @@ def generate_reports(tickers: Iterable[str] | None = None, asof_date: date | str
     summary = summary.sort_values("symbol").reset_index(drop=True)
 
     # Save snapshot
-    out_dir = Path(REPORTS_DIR)
+    out_dir = Path(REPORTS_DIR) / "cache"
     out_dir.mkdir(parents=True, exist_ok=True)
     today = date.today() if asof_date is None else (date.fromisoformat(asof_date) if isinstance(asof_date, str) else asof_date)
     out_path = out_dir / f"equity_summary_{today.strftime('%Y%m%d')}.csv"
